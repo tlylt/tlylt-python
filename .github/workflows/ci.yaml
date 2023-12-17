@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # every day at midnight
+
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Lint code
+        run: ruff check .
+
+      - name: Run tests
+        run: pytest --verbose
+
+      - name: Build package
+        run: python setup.py sdist
